@@ -8,7 +8,7 @@ import matplotlib
 import random
 
 class Particle:
-    def __init__(self, mass, radius, x, y, vx, vy):
+    def __init__(self, mass, radius, x, y, vx, vy, color):
         self.mass = mass
         self.radius = radius
         self.x = x
@@ -16,6 +16,7 @@ class Particle:
         self.vx = vx
         self.vy = vy
         self.trajectory = [] 
+        self.color = color
         
     def get_Energie_cinetique(self):
         return 0.5*self.mass*np.sqrt(self.vx**2+self.vy**2)**2
@@ -50,11 +51,11 @@ def check_particle_collision(particles):
                 m1 = particle1.mass
                 m2 = particle2.mass
 
-                particle1.vx = nu * (v2 * np.cos(theta2 - phi) * np.cos(phi) + v1 * np.sin(theta1 - phi) * np.cos(phi + np.pi/2))
-                particle1.vy = nu * (v2 * np.cos(theta2 - phi) * np.sin(phi) + v1 * np.sin(theta1 - phi) * np.sin(phi + np.pi/2))
+                particle1.vx = ((v1 * np.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * np.cos(theta2 - phi)) / (m1 + m2)) * np.cos(phi) + v1 * np.sin(theta1 - phi) * np.cos(phi + np.pi / 2)
+                particle1.vy = ((v1 * np.cos(theta1 - phi) * (m1 - m2) + 2 * m2 * v2 * np.cos(theta2 - phi)) / (m1 + m2)) * np.sin(phi) + v1 * np.sin(theta1 - phi) * np.sin(phi + np.pi / 2)
 
-                particle2.vx = nu * (v1 * np.cos(theta1 - phi) * np.cos(phi) + v2 * np.sin(theta2 - phi) * np.cos(phi + np.pi/2))
-                particle2.vy = nu * (v1 * np.cos(theta1 - phi) * np.sin(phi) + v2 * np.sin(theta2 - phi) * np.sin(phi + np.pi/2))
+                particle2.vx = ((v2 * np.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * np.cos(theta1 - phi)) / (m1 + m2)) * np.cos(phi) + v2 * np.sin(theta2 - phi) * np.cos(phi + np.pi / 2)
+                particle2.vy = ((v2 * np.cos(theta2 - phi) * (m2 - m1) + 2 * m1 * v1 * np.cos(theta1 - phi)) / (m1 + m2)) * np.sin(phi) + v2 * np.sin(theta2 - phi) * np.sin(phi + np.pi / 2)
 
 def update(frame, particles, wall_size, dt):
     simulate_collision(particles, wall_size, 1, dt)
@@ -78,8 +79,8 @@ def simulate_collision(particles, wall_size, num_steps, dt):
 
 if __name__ == "__main__":
     # Initial conditions
-    wall_size = 10
-    nu = 0.98
+    wall_size = 20
+    nu = 1
     
     """
     particles = [
@@ -89,8 +90,8 @@ if __name__ == "__main__":
         # Ajoutez autant de particules que nécessaire
     ]"""
 
-    particles = [Particle(mass=1, radius=0.1, x=random.randint(1,9),  y=random.randint(1,9), vx = (random.randint(-100,100)/50), vy = (random.randint(-100,100)/50)) for i in range(100)]
-    particles.append(Particle(mass=1, radius=1, x=5, y=5, vx=0, vy=0))
+    particles = [Particle(mass=3e-5, radius=0.05, x=random.randint(1,wall_size - 1),  y=random.randint(1,wall_size -1), vx = (random.randint(-100,100)/10), vy = (random.randint(-100,100)/10), color="blue") for i in range(200)]
+    particles.append(Particle(mass=1e-3, radius=2.3, x=wall_size/2, y=wall_size/2, vx=0, vy=0, color='#2EFF00')) #20 à 55 μm taille moyenne d'un grain de pollen
 
     # Simulation parameters
     num_steps = 100
@@ -100,10 +101,11 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     ax.set_xlim(0, wall_size)
     ax.set_ylim(0, wall_size)
+    plt.title("Modelisation d'un grain de pollen dans un fluide (2D)")
     ax.set_aspect('equal', adjustable='box')
-    sc = ax.scatter([particle.x for particle in particles], [particle.y for particle in particles], s=[particle.radius*200 for particle in particles])
+    sc = ax.scatter([particle.x for particle in particles], [particle.y for particle in particles], s=[particle.radius*200 for particle in particles], c=[particle.color for particle in particles])
 
-    line, = ax.plot([], [], 'r', lw=2)
+    line, = ax.plot([], [], '#2EFF00', lw=2)
 
     ani = FuncAnimation(fig, update, frames=num_steps, fargs=(particles, wall_size, dt), interval=10, blit=True)
     matplotlib.rcParams['animation.ffmpeg_path'] = "ffmpeg-6.1-essentials_build\\bin\\ffmpeg.exe"
