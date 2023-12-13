@@ -111,11 +111,8 @@ def animate3D(frame, particles, wall_size, dt):
     total_energy = sum([particle.mass * particle.get_Energie_cinetique() for particle in particles])
     #print(f"Énergie totale du système à l'étape {frame + 1}: {total_energy}")
 
-    line.set_data(*zip(*[(x, y) for x, y, _ in particles[-1].trajectory]))
-    line.set_3d_properties([z for _, _, z in particles[-1].trajectory])
 
-
-    return scatters + [line]
+    return scatters 
 
 def simulate_collision3D(particles, wall_size, num_steps, dt):
     """
@@ -130,63 +127,41 @@ def simulate_collision3D(particles, wall_size, num_steps, dt):
 
 if __name__ == "__main__":
 
+    # Initial conditions
+    wall_size_3D = 10
+    num_steps_3D = 100
+    dt_3D = 0.01
+    T_3D = 20
+    nb_molecule_a_3D = 300
+    nb_molecule_b_3D = 100
+    masse_molecule_3D = 1e-9
+    facteur_3D = 1000
+
     while True:
-        ## Parametre par default de la simulation
-        wall_size_3D = 20
-        T_3D = 20
-        taille_groupement_h20_3D = 0.05
-        nb_groupement_h20_3D = 300
-        k_visualisation_3D = 1e-3 #3e-6
-        facteur_3D = 1000
-        num_steps_3D = 500
-        dt_3D = 0.1
-
-        ## On présente le programme
-        print("Bienvenue sur la simulation d'un pollen en 3D\n",
-                    "Veuillez choisir vos paramètres : \n",
-                    "-Taille de l'enceinte (entier) (en micron)\n", 
-                    "-La température (decimal)(en °C)\n", 
-                    "-Taille des groupements H2O (decimal)(en micron)\n", 
-                    "-Nombre de groupement H2O (entier)\n", 
-                    "-La constrante de visualisation (decimal)\n", 
-                    "-Le delta t (decimal)(en seconde)\n", 
-                    "-Enregistrement de l'animation (bool)\n")
-
-        wall_size_3D = get_input("Entrez la valeur de la taille de l'enceine", default_value=20, value_type=int, min_value=0)
+        wall_size_3D = get_input("Entrez la valeur de la taille de l'enceine", default_value=80, value_type=int, min_value=0)
         T_3D = get_input("Entrez la valeur de la température", default_value=20, value_type=float, min_value=-273.15)
-        taille_groupement_h20_3D = get_input("Entrez la taille des groupements", default_value=0.05, value_type=float, min_value=0.01, max_value=wall_size_3D)
-        nb_groupement_h20_3D = get_input("Entrez le nombre des groupements", default_value=200, value_type=int, min_value=10, max_value=5000)
-        facteur_3D = get_input("Entrez le nombre facteur", default_value=1000, value_type=int, min_value=1, max_value=1e6)
-        k_visualisation_3D = get_input("Entrez la konstante de visualisation", default_value=1e-3, value_type=float, min_value=1e-20, max_value=1e20)
         num_steps_3D  = get_input("Entrez le nombre d'étapes", default_value=100, value_type=int, min_value=10, max_value=5000)
-        dt_3D = get_input("Entrez le delta t", default_value=0.1, value_type=float, min_value=1e-6, max_value=10)
+        nb_molecule_a_3D_3D  = get_input("Entrez le nombre de molécules du gaz environnant", default_value=500, value_type=int, min_value=10, max_value=5000)
+        nb_molecule_b  = get_input("Entrez le nombre de molécules du gaz à diffuser", default_value=80, value_type=int, min_value=10, max_value=5000)
+        facteur_3D = get_input("Entrez le nombre facteur", default_value=100, value_type=int, min_value=1, max_value=1e6)
+        dt_3D = get_input("Entrez le delta t", default_value=0.5, value_type=float, min_value=1e-6, max_value=10)
         save_anim_3D = get_input("Voulez vous enregistrer l'animation", default_value=False, value_type=bool)
-        
-        if save_anim_3D:
-                save_name_3D = get_input("Entrez le nom : ", default_value="Pollen_3D", value_type=str)
-                anim_mp4_3D = get_input("Voulez vous enregistrer l'animation en MP4 (sinon elle sera en .gif)", default_value=False, value_type=bool)
-                fps_3D = get_input("Entrez la valeur du fps", default_value=30, value_type=int, min_value=10, max_value=120)
-            
-            
-        
-        
-        ##Grace aux paramètres choisis, nous déterminons les paramètres suivant :
-        e_c_moy_h20 = 3*(1.38e-23)*(273.15+T_3D)/2
-        nb_molecule_h20 = (wall_size_3D**3)*(1e-15)*(6.022e23)/(18e-3)
-        nb_h20_par_groupement = nb_molecule_h20/nb_groupement_h20_3D
-        e_c_moy_groupement_h20 = nb_molecule_h20*e_c_moy_h20/nb_groupement_h20_3D
-        masse_groupement_h20 = nb_molecule_h20 * 18e-3/(6.022e23*(nb_groupement_h20_3D))
-        vitesse_moyenne_groument_h20 = np.sqrt(2*e_c_moy_groupement_h20/masse_groupement_h20)
-        vitesse_moyenne_h20 = np.sqrt(2*e_c_moy_h20*6.022e23/18e-3) * 1e6 * k_visualisation_3D
-        vitesse_moyenne_groument_h20_MICRO = vitesse_moyenne_groument_h20*1e6
+       
 
-        #On cree une liste de particules
+        if save_anim_3D:
+            save_name_3D = get_input("Entrez le nom : ", default_value=False, value_type=str)
+            anim_mp4_3D = get_input("Voulez vous enregistrer l'animation en MP4 (sinon elle sera en .gif)", default_value=False, value_type=bool)
+            fps_3D = get_input("Entrez la valeur du fps", default_value=30, value_type=int, min_value=10, max_value=120)
+
+
+        e_c_moy = 3*(1.38e-23)*(273.15+T_3D)/2
+        vitesse_moyenne = np.sqrt(2*e_c_moy*6.022e23/18e-3)
+        
         particles = []
 
-
         #On calcule la vitesse moyenne des groupements H2O
-        for i in range(nb_groupement_h20_3D):
-            v = np.random.normal(vitesse_moyenne_h20, 0.1*vitesse_moyenne_h20, facteur_3D)
+        for i in range(nb_molecule_a_3D):
+            v = np.random.normal(vitesse_moyenne, 0.1*vitesse_moyenne, facteur_3D)
             theta = np.random.uniform(0, 2*np.pi, facteur_3D)
             phi = np.random.uniform(0, np.pi, facteur_3D)
             
@@ -196,16 +171,30 @@ if __name__ == "__main__":
 
 
 
-            #On cree les molécules d'eau
-            particles.append(Particle3D(mass=masse_groupement_h20, radius=0.05,
+            #On cree les molécules du gaz ambiant
+            particles.append(Particle3D(mass=masse_molecule_3D, radius=0.5,
                                         x=random.uniform(1, wall_size_3D - 1),
                                         y=random.uniform(1, wall_size_3D - 1),
                                         z=random.uniform(1, wall_size_3D - 1),
                                         vx=vx_g, vy=vy_g, vz=vz_g))
 
-        #On cree le grain de pollen
-        particles.append(Particle3D(mass=1e-9*k_visualisation_3D, radius=2, x=wall_size_3D/2, y=wall_size_3D/2, z=wall_size_3D/2, vx=0, vy=0, vz=0))
-        
+        for i in range(nb_molecule_b):
+            v = np.random.normal(vitesse_moyenne, 0.1*vitesse_moyenne, facteur_3D)
+            theta = np.random.uniform(0, 2*np.pi, facteur_3D)
+            phi = np.random.uniform(0, np.pi, facteur_3D)
+            
+            vx_g = np.mean((v * np.sin(phi) * np.cos(theta))/ facteur_3D)
+            vy_g = np.mean((v * np.sin(phi) * np.sin(theta)) / facteur_3D)
+            vz_g = np.mean((v * np.cos(phi)) / facteur_3D)
+
+
+            #On cree les molécules du gaz diffusé
+            particles.append(Particle3D(mass=masse_molecule_3D, radius=0.5,
+                                        x=random.uniform(wall_size_3D/2 - 0.2*wall_size_3D, wall_size_3D/2 +  0.2*wall_size_3D),
+                                        y=random.uniform(wall_size_3D/2 - 0.2*wall_size_3D, wall_size_3D/2 +  0.2*wall_size_3D),
+                                        z=random.uniform(wall_size_3D/2 - 0.2*wall_size_3D, wall_size_3D/2 +  0.2*wall_size_3D),
+                                        vx=vx_g, vy=vy_g, vz=vz_g))
+
 
         
         fig = plt.figure()
@@ -215,8 +204,7 @@ if __name__ == "__main__":
         ax.set_zlim(0, wall_size_3D)
 
         #On affiche les points et la trajectoire du pollen
-        scatters = [ax.plot([], [], [], 'yo')[0] if i == len(particles) - 1 else ax.plot([], [], [], 'bo')[0] for i in range(len(particles))]
-        line, = ax.plot([], [], [], 'r', lw=2)
+        scatters = [ax.plot([], [], [], 'yo')[0] if i > nb_molecule_a_3D else ax.plot([], [], [], 'bo')[0] for i in range(len(particles))]
 
         #On cree une animation
         ani = FuncAnimation(fig, animate3D, frames=num_steps_3D, fargs=(particles, wall_size_3D, dt_3D), interval=10, blit=True)
